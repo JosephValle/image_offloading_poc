@@ -192,32 +192,32 @@ class _LoadingScreenState extends State<LoadingScreen> {
       body: Center(
         child: _ready
             ? Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ElevatedButton(
-              onPressed: () => Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const ImageScreen(index: 0),
-                ),
-              ),
-              child: const Text("View images"),
-            ),
-            const SizedBox(height: 16),
-            TextButton(
-              onPressed: _reset,
-              child: const Text("Reset & redownload"),
-            ),
-          ],
-        )
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ElevatedButton(
+                    onPressed: () => Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const ImageScreen(index: 0),
+                      ),
+                    ),
+                    child: const Text("View images"),
+                  ),
+                  const SizedBox(height: 16),
+                  TextButton(
+                    onPressed: _reset,
+                    child: const Text("Reset & redownload"),
+                  ),
+                ],
+              )
             : Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const CircularProgressIndicator(),
-            const SizedBox(height: 24),
-            Text(_status, style: Theme.of(context).textTheme.bodyMedium),
-          ],
-        ),
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 24),
+                  Text(_status, style: Theme.of(context).textTheme.bodyMedium),
+                ],
+              ),
       ),
     );
   }
@@ -255,7 +255,7 @@ class ImageScreen extends StatelessWidget {
             onPressed: () => Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(builder: (_) => const LoadingScreen()),
-                  (_) => false,
+              (_) => false,
             ),
             child: const Text("Done"),
           ),
@@ -274,20 +274,20 @@ class ImageScreen extends StatelessWidget {
                 isFirst
                     ? const SizedBox.shrink()
                     : ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text("Back"),
-                ),
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text("Back"),
+                      ),
                 isLast
                     ? const SizedBox.shrink()
                     : ElevatedButton(
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ImageScreen(index: index + 1),
-                    ),
-                  ),
-                  child: const Text("Next"),
-                ),
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ImageScreen(index: index + 1),
+                          ),
+                        ),
+                        child: const Text("Next"),
+                      ),
               ],
             ),
           ),
