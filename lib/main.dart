@@ -12,8 +12,9 @@ import 'package:path_provider/path_provider.dart';
 // Add or remove entries here to change what gets extracted and shown.
 // ---------------------------------------------------------------------------
 const List<String> kImagePaths = [
-  'image1.jpg',
-  'image2.jpg',
+  'img1.jpg',
+  'img2.jpg',
+  'img3.jpg',
   // 'subdir/image3.jpg',
 ];
 
