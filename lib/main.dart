@@ -76,7 +76,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
       // 1. Download zip (skip if cached)
       if (!File(zipPath).existsSync()) {
         _setStatus('Downloading assets…');
-        final response = await http.get(Uri.parse('https://example.com/assets.zip'));
+        final response = await http.get(Uri.parse('https://raw.githubusercontent.com/JosephValle/image_offloading_poc/main/assets.zip'));
         if (response.statusCode != 200) throw Exception('Download failed: ${response.statusCode}');
         await File(zipPath).writeAsBytes(response.bodyBytes);
       }
