@@ -79,6 +79,10 @@ class App extends StatelessWidget {
 // Once all three steps complete, the spinner is replaced by a "View images"
 // button. The user taps it to navigate; by that point every image is already
 // in memory so ImageScreen renders instantly.
+//
+// A "Reset & redownload" button is also available once ready, which clears
+// the cached zip and image files from disk, clears the in-memory cache, and
+// re-runs the prepare pipeline from scratch.
 // ---------------------------------------------------------------------------
 class LoadingScreen extends StatefulWidget {
   const LoadingScreen({super.key});
@@ -149,6 +153,27 @@ class _LoadingScreenState extends State<LoadingScreen> {
     }
   }
 
+  Future<void> _reset() async {
+    setState(() {
+      _ready = false;
+      _status = "Resetting…";
+    });
+
+    final dir = await getApplicationDocumentsDirectory();
+
+    final zipFile = File("${dir.path}/assets.zip");
+    if (zipFile.existsSync()) await zipFile.delete();
+
+    for (final name in kImagePaths) {
+      final f = File("${dir.path}/$name");
+      if (f.existsSync()) await f.delete();
+    }
+
+    ImageCache.instance.images.clear();
+
+    await _prepare();
+  }
+
   /// Reads a file from disk and fully decodes it into a [ui.Image].
   Future<ui.Image> _decodeFile(String path) async {
     final bytes = await File(path).readAsBytes();
@@ -166,23 +191,33 @@ class _LoadingScreenState extends State<LoadingScreen> {
     return Scaffold(
       body: Center(
         child: _ready
-            ? ElevatedButton(
-                onPressed: () => Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const ImageScreen(index: 0),
-                  ),
+            ? Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ElevatedButton(
+              onPressed: () => Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const ImageScreen(index: 0),
                 ),
-                child: const Text("View images"),
-              )
-            : Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const CircularProgressIndicator(),
-                  const SizedBox(height: 24),
-                  Text(_status, style: Theme.of(context).textTheme.bodyMedium),
-                ],
               ),
+              child: const Text("View images"),
+            ),
+            const SizedBox(height: 16),
+            TextButton(
+              onPressed: _reset,
+              child: const Text("Reset & redownload"),
+            ),
+          ],
+        )
+            : Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(height: 24),
+            Text(_status, style: Theme.of(context).textTheme.bodyMedium),
+          ],
+        ),
       ),
     );
   }
@@ -196,7 +231,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
 // paints it synchronously on the first frame — there is no loading state.
 //
 // Next/Back buttons push/pop ImageScreen with index ± 1. The first screen
-// hides Back; the last screen hides Next.
+// hides Back; the last screen hides Next. A "Done" button in the app bar
+// returns the user to the LoadingScreen via popUntil.
 // ---------------------------------------------------------------------------
 class ImageScreen extends StatelessWidget {
   const ImageScreen({super.key, required this.index});
@@ -214,6 +250,16 @@ class ImageScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text("Image ${index + 1} of ${kImagePaths.length}"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (_) => const LoadingScreen()),
+                  (_) => false,
+            ),
+            child: const Text("Done"),
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -228,20 +274,20 @@ class ImageScreen extends StatelessWidget {
                 isFirst
                     ? const SizedBox.shrink()
                     : ElevatedButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text("Back"),
-                      ),
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("Back"),
+                ),
                 isLast
                     ? const SizedBox.shrink()
                     : ElevatedButton(
-                        onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => ImageScreen(index: index + 1),
-                          ),
-                        ),
-                        child: const Text("Next"),
-                      ),
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ImageScreen(index: index + 1),
+                    ),
+                  ),
+                  child: const Text("Next"),
+                ),
               ],
             ),
           ),
